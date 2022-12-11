@@ -9,8 +9,6 @@ from werkzeug.utils import secure_filename
 import random
 from line_notify import lineNotifyMessage
 from roboflow import Roboflow
-import logging
-
 
 
 # create the extension
@@ -40,10 +38,6 @@ if os.getenv('TOKEN'):
     app.config["TOKEN"] = os.getenv('TOKEN')
 else:
     app.config["TOKEN"] = "8888"
-
-gunicorn_error_logger = logging.getLogger('gunicorn.error')
-app.logger.handlers.extend(gunicorn_error_logger.handlers)
-app.logger.setLevel(logging.DEBUG)
 
 
 app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
