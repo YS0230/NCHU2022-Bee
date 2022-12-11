@@ -9,9 +9,16 @@ from werkzeug.utils import secure_filename
 import random
 from line_notify import lineNotifyMessage
 from roboflow import Roboflow
+import logging
 
 
+Bee_rf = Roboflow(api_key=os.getenv('api_key'))
+Bee_project = Bee_rf.workspace().project("honey-bee-detection-model-zgjnb")
+Bee_model = Bee_project.version(2).model
 
+Hornet_rf = Roboflow(api_key=os.getenv('api_key'))
+Hornet_project = Hornet_rf.workspace().project("bee-d4yoh")
+Hornet_model = Hornet_project.version(5).model
 
 
 # create the extension
@@ -41,6 +48,10 @@ if os.getenv('TOKEN'):
     app.config["TOKEN"] = os.getenv('TOKEN')
 else:
     app.config["TOKEN"] = "8888"
+
+gunicorn_error_logger = logging.getLogger('gunicorn.error')
+app.logger.handlers.extend(gunicorn_error_logger.handlers)
+app.logger.setLevel(logging.DEBUG)
 
 
 app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
@@ -100,6 +111,21 @@ def fileUpload():
     file.save(app.config["UPLOADED_PHOTOS_DEST"]+"/"+filename)
     return dectectAndNotify("uploads/"+filename)
 
+def dectectAndNotify(path):
+    beens = Bee_model.predict(path, confidence=40, overlap=30).json()
+    numberOfBees =  len([x for x in beens['predictions'] if x['class'] == 'bee'])
+    hiveID = random.randint(1,5)
+    hornets = Hornet_model.predict(path, confidence=40, overlap=30).json()
+    hasHornets = 'Y' if len([x for x in hornets['predictions'] if x['class'] == 'Asian Hornet']) > 0 else 'N'
+    res = ""
+    if numberOfBees>0:
+        res = AddData(hiveID,numberOfBees,hasHornets)
+    if hasHornets == 'Y':
+        if not os.path.exists(app.config["PREDICT_PHOTOS_DEST"]):
+            os.mkdir(app.config["PREDICT_PHOTOS_DEST"])
+        Hornet_model.predict(path, confidence=40, overlap=30).save(app.config["PREDICT_PHOTOS_DEST"] +"/prediction.jpg")
+        lineNotifyMessage('注意!!疑似虎頭蜂出沒',"predict/prediction.jpg",app.config["LINE_TOKEN"] )
+    return res
 
 def AddData(hiveID,numberOfBees,hasHornets):
     try:
