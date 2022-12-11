@@ -104,6 +104,8 @@ def Reocrd_serializer(Reocrd):
 def fileUpload():
     file = request.files['file'] 
     filename = secure_filename(file.filename)
+    if not os.path.exists(app.config["UPLOADED_PHOTOS_DEST"]):
+        os.mkdir(app.config["UPLOADED_PHOTOS_DEST"])
     file.save(app.config["UPLOADED_PHOTOS_DEST"]+"/"+filename)
     return dectectAndNotify("uploads/"+filename)
 
