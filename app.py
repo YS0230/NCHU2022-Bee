@@ -9,7 +9,7 @@ from werkzeug.utils import secure_filename
 import random
 from line_notify import lineNotifyMessage
 from roboflow import Roboflow
-
+from flask_cors import CORS
 
 
 Bee_rf = Roboflow(api_key=os.getenv('api_key'))
@@ -58,6 +58,7 @@ app.config["PREDICT_PHOTOS_DEST"] = "predict"
 
 # initialize the app with the extension
 db.init_app(app)
+CORS(app)
 
 with app.app_context():
     print('初始化資料庫')
