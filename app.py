@@ -112,7 +112,7 @@ def fileUpload():
         file.save(app.config["UPLOADED_PHOTOS_DEST"]+"/"+filename)
         return dectectAndNotify("uploads/"+filename)
     else:
-        return "Please package the file into an object ['file':source]" ,200
+        return "Please package the file into an object ['file':source]"
 
 def dectectAndNotify(path):
     beens = Bee_model.predict(path, confidence=40, overlap=30).json()
