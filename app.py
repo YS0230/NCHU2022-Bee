@@ -105,19 +105,22 @@ def Reocrd_serializer(Reocrd):
 @app.route('/ReactUpload', methods=['POST'])
 def fileUpload():
     if 'file' in request.files:
-        file = request.files['file'] 
+        file = request.files['file']         
+        ID = request.files['ID'] 
         filename = secure_filename(file.filename)
         if not os.path.exists(app.config["UPLOADED_PHOTOS_DEST"]):
             os.mkdir(app.config["UPLOADED_PHOTOS_DEST"])
         file.save(app.config["UPLOADED_PHOTOS_DEST"]+"/"+filename)
-        return dectectAndNotify("uploads/"+filename)
+        return dectectAndNotify("uploads/"+filename,ID)
     else:
         return "Please package the file into an object ['file':source]"
 
-def dectectAndNotify(path):
+def dectectAndNotify(path,ID):
     beens = Bee_model.predict(path, confidence=40, overlap=30).json()
     numberOfBees =  len([x for x in beens['predictions'] if x['class'] == 'bee'])
-    hiveID = random.randint(1,5)
+    hiveID = ID
+    if hiveID is None:
+        hiveID = random.randint(1,5)
     hornets = Hornet_model.predict(path, confidence=40, overlap=30).json()
     hasHornets = 'Y' if len([x for x in hornets['predictions'] if x['class'] == 'Asian Hornet']) > 0 else 'N'
     res = "uuload success"
