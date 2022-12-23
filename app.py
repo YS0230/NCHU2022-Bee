@@ -101,14 +101,18 @@ def Reocrd_serializer(Reocrd):
         'CreateTime' : Reocrd.CreateTime
     }
 
+
 @app.route('/ReactUpload', methods=['POST'])
 def fileUpload():
-    file = request.files['file'] 
-    filename = secure_filename(file.filename)
-    if not os.path.exists(app.config["UPLOADED_PHOTOS_DEST"]):
-        os.mkdir(app.config["UPLOADED_PHOTOS_DEST"])
-    file.save(app.config["UPLOADED_PHOTOS_DEST"]+"/"+filename)
-    return dectectAndNotify("uploads/"+filename)
+    if 'file' in request.files:
+        file = request.files['file'] 
+        filename = secure_filename(file.filename)
+        if not os.path.exists(app.config["UPLOADED_PHOTOS_DEST"]):
+            os.mkdir(app.config["UPLOADED_PHOTOS_DEST"])
+        file.save(app.config["UPLOADED_PHOTOS_DEST"]+"/"+filename)
+        return dectectAndNotify("uploads/"+filename)
+    else:
+        return "Please package the file into an object ['file':source]"
 
 def dectectAndNotify(path):
     beens = Bee_model.predict(path, confidence=40, overlap=30).json()
@@ -116,7 +120,7 @@ def dectectAndNotify(path):
     hiveID = random.randint(1,5)
     hornets = Hornet_model.predict(path, confidence=40, overlap=30).json()
     hasHornets = 'Y' if len([x for x in hornets['predictions'] if x['class'] == 'Asian Hornet']) > 0 else 'N'
-    res = ""
+    res = "uuload success"
     if numberOfBees>0:
         res = AddData(hiveID,numberOfBees,hasHornets)
     if hasHornets == 'Y':
@@ -124,7 +128,7 @@ def dectectAndNotify(path):
             os.mkdir(app.config["PREDICT_PHOTOS_DEST"])
         Hornet_model.predict(path, confidence=40, overlap=30).save(app.config["PREDICT_PHOTOS_DEST"] +"/prediction.jpg")
         lineNotifyMessage('注意!!第'+str(numberOfBees)+'號蜂箱疑似虎頭蜂出沒',"predict/prediction.jpg",app.config["LINE_TOKEN"] )
-    return res
+    return res,200
 
 def AddData(hiveID,numberOfBees,hasHornets):
     try:
