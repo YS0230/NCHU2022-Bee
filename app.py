@@ -105,8 +105,10 @@ def Reocrd_serializer(Reocrd):
 @app.route('/ReactUpload', methods=['POST'])
 def fileUpload():
     if 'file' in request.files:
-        file = request.files['file']         
-        ID = request.files['ID'] 
+        file = request.files['file']   
+        ID = None  
+        if 'ID' in request.files:    
+            ID = request.files['ID'] 
         filename = secure_filename(file.filename)
         if not os.path.exists(app.config["UPLOADED_PHOTOS_DEST"]):
             os.mkdir(app.config["UPLOADED_PHOTOS_DEST"])
