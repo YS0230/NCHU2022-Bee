@@ -71,6 +71,13 @@ def root():
     HiveIDs =db.session.execute(db.select(Reocrd.HiveID).distinct())
     return jsonify([*map(HiveID_serializer,HiveIDs)])
 
+@app.route("/d", methods=["GET", "POST"])
+def d():
+    datas =Reocrd.query.filter_by(id= 29).first()
+    db.session.delete(datas)
+    db.session.commit()
+    return 200
+
 #取得蜂箱編號
 @app.route('/hiveNumber', methods=['GET'])
 def getHiveIDs():
