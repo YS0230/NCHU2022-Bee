@@ -114,8 +114,10 @@ def fileUpload():
     if 'file' in request.files:
         file = request.files['file']   
         ID = None  
+        print('test1'+ID)
         if 'ID' in request.files:    
             ID = request.files['ID'] 
+            print('test2'+ID)
         filename = secure_filename(file.filename)
         if not os.path.exists(app.config["UPLOADED_PHOTOS_DEST"]):
             os.mkdir(app.config["UPLOADED_PHOTOS_DEST"])
