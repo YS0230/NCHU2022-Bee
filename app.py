@@ -71,13 +71,6 @@ def root():
     HiveIDs =db.session.execute(db.select(Reocrd.HiveID).distinct())
     return jsonify([*map(HiveID_serializer,HiveIDs)])
 
-@app.route("/d", methods=["GET", "POST"])
-def d():
-    item =Reocrd.query.filter_by(id= 30).first()
-    item.HasHornets = 'N'
-    db.session.add(item)
-    db.session.commit()
-    return 200
 
 #取得蜂箱編號
 @app.route('/hiveNumber', methods=['GET'])
@@ -114,23 +107,22 @@ def Reocrd_serializer(Reocrd):
 def fileUpload():
     if 'file' in request.files:
         file = request.files['file']   
-        BOX_ID = None  
-        print('test1'+BOX_ID)
+        ID = None  
         if 'ID' in request.files:    
-            BOX_ID = request.files['ID'] 
-            print('test2'+BOX_ID)
+            ID = request.files['ID'] 
+            print('test2'+ID)
         filename = secure_filename(file.filename)
         if not os.path.exists(app.config["UPLOADED_PHOTOS_DEST"]):
             os.mkdir(app.config["UPLOADED_PHOTOS_DEST"])
         file.save(app.config["UPLOADED_PHOTOS_DEST"]+"/"+filename)
-        return dectectAndNotify("uploads/"+filename,BOX_ID)
+        return dectectAndNotify("uploads/"+filename,ID)
     else:
         return "Please package the file into an object ['file':source]"
 
-def dectectAndNotify(path,BOX_ID):
+def dectectAndNotify(path,ID):
     beens = Bee_model.predict(path, confidence=40, overlap=30).json()
     numberOfBees =  len([x for x in beens['predictions'] if x['class'] == 'bee'])
-    hiveID = BOX_ID
+    hiveID = ID
     if hiveID is None:
         hiveID = random.randint(1,5)
     hornets = Hornet_model.predict(path, confidence=40, overlap=30).json()
