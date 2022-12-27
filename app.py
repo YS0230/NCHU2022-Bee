@@ -113,23 +113,23 @@ def Reocrd_serializer(Reocrd):
 def fileUpload():
     if 'file' in request.files:
         file = request.files['file']   
-        ID = None  
-        print('test1'+ID)
+        BOX_ID = None  
+        print('test1'+BOX_ID)
         if 'ID' in request.files:    
-            ID = request.files['ID'] 
-            print('test2'+ID)
+            BOX_ID = request.files['ID'] 
+            print('test2'+BOX_ID)
         filename = secure_filename(file.filename)
         if not os.path.exists(app.config["UPLOADED_PHOTOS_DEST"]):
             os.mkdir(app.config["UPLOADED_PHOTOS_DEST"])
         file.save(app.config["UPLOADED_PHOTOS_DEST"]+"/"+filename)
-        return dectectAndNotify("uploads/"+filename,ID)
+        return dectectAndNotify("uploads/"+filename,BOX_ID)
     else:
         return "Please package the file into an object ['file':source]"
 
-def dectectAndNotify(path,ID):
+def dectectAndNotify(path,BOX_ID):
     beens = Bee_model.predict(path, confidence=40, overlap=30).json()
     numberOfBees =  len([x for x in beens['predictions'] if x['class'] == 'bee'])
-    hiveID = ID
+    hiveID = BOX_ID
     if hiveID is None:
         hiveID = random.randint(1,5)
     hornets = Hornet_model.predict(path, confidence=40, overlap=30).json()
