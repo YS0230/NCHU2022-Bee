@@ -73,8 +73,9 @@ def root():
 
 @app.route("/d", methods=["GET", "POST"])
 def d():
-    datas =Reocrd.query.filter_by(id= 29).first()
-    db.session.delete(datas)
+    item =Reocrd.query.filter_by(id= 30).first()
+    item.HasHornets = 'N'
+    db.session.add(item)
     db.session.commit()
     return 200
 
